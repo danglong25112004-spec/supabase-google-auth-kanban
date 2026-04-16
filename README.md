@@ -21,11 +21,18 @@
    - Thêm Redirect URI: `https://<your-project-id>.supabase.co/auth/v1/callback`.
 
 ### 2. Biến môi trường
-Tạo file `.env` dựa trên `.env.example` và điền thông tin từ Supabase (Project Settings > API):
+Tạo file `.env` ở thư mục gốc của project và điền thông tin từ Supabase. Bạn có thể tìm thấy các thông tin này trong Supabase Dashboard tại mục **Project Settings > API**:
+
+1. **Project URL**: Copy giá trị từ mục `URL`.
+2. **Anon Key**: Copy giá trị từ mục `anon public`.
+
+Nội dung file `.env`:
 ```env
-VITE_SUPABASE_URL=your_supabase_project_url
-VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+VITE_SUPABASE_URL=https://your-project-id.supabase.co
+VITE_SUPABASE_ANON_KEY=your-anon-public-key
 ```
+
+*Lưu ý: Không bao giờ chia sẻ file `.env` hoặc các key bí mật của bạn.*
 
 ### 3. Chạy ứng dụng
 ```bash
