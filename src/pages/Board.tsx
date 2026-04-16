@@ -30,33 +30,31 @@ export function Board() {
 
   useEffect(() => {
     const loadData = async () => {
-      console.log('[Board] Loading projects...');
+      setLoading(true);
       try {
         const projectsData = await projectService.getProjects();
-        console.log('[Board] Projects loaded:', projectsData?.length);
         setProjects(projectsData || []);
-        if (projectsData && projectsData.length > 0) {
-          setSelectedProjectId(projectsData[0].id);
-        }
+        // Không ép chọn project đầu tiên nữa, để mặc định là "Tất cả dự án" ("")
+        // để người dùng thấy toàn bộ nhiệm vụ ngay khi vào trang.
       } catch (error) {
         console.error('[Board] Error loading projects:', error);
+      } finally {
+        setLoading(false);
       }
     };
     loadData();
   }, []);
 
   useEffect(() => {
-    if (selectedProjectId) {
-      console.log('[Board] Project selected, loading tasks for:', selectedProjectId);
-      loadTasks();
-    }
+    // Luôn tải tasks khi selectedProjectId thay đổi, kể cả khi rỗng (Tất cả)
+    loadTasks();
   }, [selectedProjectId]);
 
   const loadTasks = async () => {
     setLoading(true);
     try {
+      console.log('[Board] Loading tasks for project:', selectedProjectId || 'All');
       const tasksData = await taskService.getTasks(selectedProjectId);
-      console.log('[Board] Tasks loaded:', tasksData?.length);
       setTasks(tasksData || []);
     } catch (error) {
       console.error('[Board] Error loading tasks:', error);
@@ -65,7 +63,7 @@ export function Board() {
     }
   };
 
-  const handleOpenModal = (task?: Task) => {
+  const handleOpenModal = (task?: Task, initialStatus?: TaskStatus) => {
     if (task) {
       setEditingTask(task);
       setFormData({
@@ -79,7 +77,7 @@ export function Board() {
       setFormData({
         title: '',
         description: '',
-        status: 'todo',
+        status: initialStatus || 'todo',
         priority: 'Medium'
       });
     }
@@ -92,18 +90,18 @@ export function Board() {
       if (editingTask) {
         await taskService.updateTask(editingTask.id, formData);
       } else {
-        // Ensure project_id is null if selectedProjectId is empty
-        const projectId = selectedProjectId && selectedProjectId !== "" ? selectedProjectId : null;
+        // Gán vào dự án hiện tại nếu đang ở chế độ xem một dự án cụ thể
+        const targetProjectId = selectedProjectId && selectedProjectId !== "" ? selectedProjectId : null;
         
         await taskService.createTask({
           ...formData,
-          project_id: projectId as string
+          project_id: targetProjectId
         });
       }
       setIsModalOpen(false);
-      loadTasks();
+      // Gọi loadTasks ngay lập tức để cập nhật bảng
+      await loadTasks();
     } catch (error) {
-      // Error is already handled in taskService (alert + console.error)
       console.error('Board handleSubmit error:', error);
     }
   };
@@ -141,12 +139,20 @@ export function Board() {
           <div className="flex items-center gap-3 mb-2">
             <Layout className="w-6 h-6 text-blue-500" />
             <h1 className="text-2xl font-bold text-white">Bảng Kanban</h1>
+            <button 
+              onClick={() => loadTasks()} 
+              className="p-1.5 text-slate-500 hover:text-white transition-colors"
+              title="Tải lại dữ liệu"
+            >
+              <Clock className="w-4 h-4" />
+            </button>
           </div>
           <select 
             value={selectedProjectId}
             onChange={(e) => setSelectedProjectId(e.target.value)}
-            className="bg-slate-900 border border-slate-800 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="bg-slate-900 border border-slate-800 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-[200px]"
           >
+            <option value="">Tất cả dự án</option>
             {projects.map(p => (
               <option key={p.id} value={p.id}>{p.name}</option>
             ))}
@@ -241,7 +247,7 @@ export function Board() {
                   ))}
                 
                 <button 
-                  onClick={() => handleOpenModal()}
+                  onClick={() => handleOpenModal(undefined, column.status)}
                   className="w-full py-3 border-2 border-dashed border-slate-800 rounded-2xl text-slate-600 hover:text-slate-400 hover:border-slate-700 hover:bg-slate-900/50 transition-all text-sm font-medium flex items-center justify-center gap-2"
                 >
                   <Plus className="w-4 h-4" /> Thêm mới
