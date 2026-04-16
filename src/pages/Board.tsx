@@ -5,7 +5,6 @@ import {
   Plus, 
   MoreVertical, 
   Star, 
-  Calendar, 
   Trash2, 
   Edit2,
   CheckCircle2,
@@ -26,8 +25,7 @@ export function Board() {
     title: '',
     description: '',
     status: 'todo' as TaskStatus,
-    priority: 'Medium' as TaskPriority,
-    due_date: ''
+    priority: 'Medium' as TaskPriority
   });
 
   useEffect(() => {
@@ -74,8 +72,7 @@ export function Board() {
         title: task.title,
         description: task.description || '',
         status: task.status,
-        priority: task.priority,
-        due_date: task.due_date ? new Date(task.due_date).toISOString().split('T')[0] : ''
+        priority: task.priority
       });
     } else {
       setEditingTask(null);
@@ -83,8 +80,7 @@ export function Board() {
         title: '',
         description: '',
         status: 'todo',
-        priority: 'Medium',
-        due_date: ''
+        priority: 'Medium'
       });
     }
     setIsModalOpen(true);
@@ -232,14 +228,6 @@ export function Board() {
                           >
                             <Star className={cn("w-4 h-4", task.is_starred && "fill-current")} />
                           </button>
-                          {task.due_date && (
-                            <div className="flex items-center gap-1.5 text-slate-500">
-                              <Calendar className="w-3.5 h-3.5" />
-                              <span className="text-[10px] font-medium">
-                                {new Date(task.due_date).toLocaleDateString('vi-VN')}
-                              </span>
-                            </div>
-                          )}
                         </div>
                         <div className="flex -space-x-2">
                           <img 
@@ -331,15 +319,6 @@ export function Board() {
                         <option value="High">Cao</option>
                       </select>
                     </div>
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Hạn chót</label>
-                    <input
-                      type="date"
-                      value={formData.due_date}
-                      onChange={e => setFormData({ ...formData, due_date: e.target.value })}
-                      className="w-full bg-slate-800 border border-slate-700 rounded-2xl px-5 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
-                    />
                   </div>
                   <div className="flex gap-4 pt-4">
                     <button

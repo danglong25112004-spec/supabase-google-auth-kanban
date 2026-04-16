@@ -61,8 +61,8 @@ export function Dashboard() {
       bg: 'bg-emerald-500/10' 
     },
     { 
-      label: 'Quá hạn', 
-      value: (tasks || []).filter(t => t.due_date && new Date(t.due_date) < new Date() && t.status !== 'done').length, 
+      label: 'Việc gấp', 
+      value: (tasks || []).filter(t => t.priority === 'High' && t.status !== 'done').length, 
       icon: AlertCircle, 
       color: 'text-rose-500', 
       bg: 'bg-rose-500/10' 
@@ -136,7 +136,7 @@ export function Dashboard() {
                 </div>
                 <div className="text-right">
                   <p className="text-xs font-medium text-slate-400">
-                    {task.due_date ? new Date(task.due_date).toLocaleDateString('vi-VN') : 'Không có hạn'}
+                    {new Date(task.created_at).toLocaleDateString('vi-VN')}
                   </p>
                 </div>
               </div>
