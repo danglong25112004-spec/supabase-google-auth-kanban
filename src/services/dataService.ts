@@ -75,11 +75,11 @@ export const taskService = {
       priority: task.priority || 'Medium',
       is_starred: task.is_starred || false,
       user_id: user.id,
-      project_id: task.project_id // Keeping this as it's likely in the DB and used for filtering
+      project_id: (task.project_id && task.project_id !== "") ? task.project_id : null
     };
 
     console.log("USER:", user);
-    console.log("PAYLOAD:", payload);
+    console.log("CREATE TASK PAYLOAD:", payload);
 
     const { data, error } = await supabase
       .from('tasks')
@@ -89,24 +89,40 @@ export const taskService = {
     
     if (error) {
       console.error("INSERT ERROR:", error);
-      alert(error.message);
+      alert(`Lỗi thêm task: ${error.message}`);
       throw error;
     }
     return data as Task;
   },
 
   async updateTask(id: string, updates: Partial<Task>) {
-    console.log("UPDATING TASK:", id, updates);
+    const { data: userData } = await supabase.auth.getUser();
+    const user = userData.user;
+
+    if (!user) {
+      throw new Error("User not authenticated");
+    }
+
+    // Sanitize updates: convert empty string project_id to null
+    const sanitizedUpdates = { ...updates };
+    if (sanitizedUpdates.project_id === "") {
+      sanitizedUpdates.project_id = undefined; // or null, but let's be explicit
+      (sanitizedUpdates as any).project_id = null;
+    }
+
+    console.log("UPDATING TASK ID:", id);
+    console.log("UPDATE PAYLOAD:", sanitizedUpdates);
+
     const { data, error } = await supabase
       .from('tasks')
-      .update(updates)
+      .update(sanitizedUpdates)
       .eq('id', id)
       .select()
       .single();
     
     if (error) {
       console.error("UPDATE ERROR:", error);
-      alert(error.message);
+      alert(`Lỗi cập nhật task: ${error.message}`);
       throw error;
     }
     return data as Task;

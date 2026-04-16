@@ -92,9 +92,12 @@ export function Board() {
       if (editingTask) {
         await taskService.updateTask(editingTask.id, formData);
       } else {
+        // Ensure project_id is null if selectedProjectId is empty
+        const projectId = selectedProjectId && selectedProjectId !== "" ? selectedProjectId : null;
+        
         await taskService.createTask({
           ...formData,
-          project_id: selectedProjectId
+          project_id: projectId as string
         });
       }
       setIsModalOpen(false);
