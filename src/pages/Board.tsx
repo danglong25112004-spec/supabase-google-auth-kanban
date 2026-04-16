@@ -32,14 +32,16 @@ export function Board() {
 
   useEffect(() => {
     const loadData = async () => {
+      console.log('[Board] Loading projects...');
       try {
         const projectsData = await projectService.getProjects();
-        setProjects(projectsData);
-        if (projectsData.length > 0) {
+        console.log('[Board] Projects loaded:', projectsData?.length);
+        setProjects(projectsData || []);
+        if (projectsData && projectsData.length > 0) {
           setSelectedProjectId(projectsData[0].id);
         }
       } catch (error) {
-        console.error('Error loading projects:', error);
+        console.error('[Board] Error loading projects:', error);
       }
     };
     loadData();
@@ -47,6 +49,7 @@ export function Board() {
 
   useEffect(() => {
     if (selectedProjectId) {
+      console.log('[Board] Project selected, loading tasks for:', selectedProjectId);
       loadTasks();
     }
   }, [selectedProjectId]);
@@ -55,9 +58,10 @@ export function Board() {
     setLoading(true);
     try {
       const tasksData = await taskService.getTasks(selectedProjectId);
-      setTasks(tasksData);
+      console.log('[Board] Tasks loaded:', tasksData?.length);
+      setTasks(tasksData || []);
     } catch (error) {
-      console.error('Error loading tasks:', error);
+      console.error('[Board] Error loading tasks:', error);
     } finally {
       setLoading(false);
     }
@@ -170,7 +174,7 @@ export function Board() {
                   <div className={cn("w-2 h-2 rounded-full", column.color)} />
                   <h3 className="font-bold text-slate-200">{column.title}</h3>
                   <span className="text-xs font-bold bg-slate-800 text-slate-500 px-2 py-0.5 rounded-full">
-                    {tasks.filter(t => t.status === column.status).length}
+                    {(tasks || []).filter(t => t.status === column.status).length}
                   </span>
                 </div>
                 <button className="p-1 text-slate-500 hover:text-slate-300">
@@ -179,7 +183,7 @@ export function Board() {
               </div>
 
               <div className="flex-1 space-y-4 min-h-[200px]">
-                {tasks
+                {(tasks || [])
                   .filter(t => t.status === column.status)
                   .map(task => (
                     <motion.div

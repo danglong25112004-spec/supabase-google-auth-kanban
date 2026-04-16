@@ -11,9 +11,13 @@ import { Team } from './pages/Team';
 import { Storage } from './pages/Storage';
 import { Profile } from './pages/Profile';
 import { isSupabaseConfigured } from './lib/supabase';
+import { ErrorBoundary } from './components/ErrorBoundary';
 
 function App() {
+  console.log('[App] Rendering, isSupabaseConfigured:', isSupabaseConfigured);
+
   if (!isSupabaseConfigured) {
+    console.warn('[App] Supabase not configured, showing setup UI');
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-950 text-white p-4">
         <div className="max-w-md w-full bg-slate-900 border border-slate-800 rounded-3xl p-8 text-center shadow-2xl">
@@ -36,31 +40,33 @@ function App() {
   }
 
   return (
-    <AuthProvider>
-      <Router>
-        <Routes>
-          {/* Public Routes */}
-          <Route path="/login" element={<Login />} />
-          <Route path="/auth/callback" element={<AuthCallback />} />
+    <ErrorBoundary>
+      <AuthProvider>
+        <Router>
+          <Routes>
+            {/* Public Routes */}
+            <Route path="/login" element={<Login />} />
+            <Route path="/auth/callback" element={<AuthCallback />} />
 
-          {/* Protected App Routes */}
-          <Route path="/app" element={<ProtectedRoute />}>
-            <Route element={<AppLayout />}>
-              <Route index element={<Dashboard />} />
-              <Route path="board" element={<Board />} />
-              <Route path="analytics" element={<Analytics />} />
-              <Route path="team" element={<Team />} />
-              <Route path="storage" element={<Storage />} />
-              <Route path="profile" element={<Profile />} />
+            {/* Protected App Routes */}
+            <Route path="/app" element={<ProtectedRoute />}>
+              <Route element={<AppLayout />}>
+                <Route index element={<Dashboard />} />
+                <Route path="board" element={<Board />} />
+                <Route path="analytics" element={<Analytics />} />
+                <Route path="team" element={<Team />} />
+                <Route path="storage" element={<Storage />} />
+                <Route path="profile" element={<Profile />} />
+              </Route>
             </Route>
-          </Route>
 
-          {/* Redirects */}
-          <Route path="/" element={<Navigate to="/app" replace />} />
-          <Route path="*" element={<Navigate to="/app" replace />} />
-        </Routes>
-      </Router>
-    </AuthProvider>
+            {/* Redirects */}
+            <Route path="/" element={<Navigate to="/app" replace />} />
+            <Route path="*" element={<Navigate to="/app" replace />} />
+          </Routes>
+        </Router>
+      </AuthProvider>
+    </ErrorBoundary>
   );
 }
 

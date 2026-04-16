@@ -3,16 +3,22 @@ import { Project, Task, TaskStatus, TaskPriority } from '../types';
 
 export const projectService = {
   async getProjects() {
+    console.log('[projectService] getProjects called');
     const { data, error } = await supabase
       .from('projects')
       .select('*')
       .order('created_at', { ascending: false });
     
-    if (error) throw error;
-    return data as Project[];
+    if (error) {
+      console.error('[projectService] getProjects error:', error);
+      throw error;
+    }
+    console.log('[projectService] getProjects success, count:', data?.length);
+    return (data || []) as Project[];
   },
 
   async createProject(name: string, description?: string) {
+    console.log('[projectService] createProject called:', { name });
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) throw new Error('Not authenticated');
 
@@ -22,7 +28,11 @@ export const projectService = {
       .select()
       .single();
     
-    if (error) throw error;
+    if (error) {
+      console.error('[projectService] createProject error:', error);
+      throw error;
+    }
+    console.log('[projectService] createProject success:', data?.id);
     return data as Project;
   },
 
@@ -37,10 +47,14 @@ export const projectService = {
 
 export const taskService = {
   async getTasks(projectId?: string) {
+    console.log('[taskService] getTasks called, projectId:', projectId);
     const { data: userData } = await supabase.auth.getUser();
     const user = userData.user;
 
-    if (!user) throw new Error("User not authenticated");
+    if (!user) {
+      console.warn('[taskService] getTasks: User not authenticated');
+      return [];
+    }
 
     let query = supabase
       .from('tasks')
@@ -48,16 +62,17 @@ export const taskService = {
       .eq('user_id', user.id)
       .order('created_at', { ascending: false });
     
-    if (projectId) {
+    if (projectId && projectId !== "") {
       query = query.eq('project_id', projectId);
     }
 
     const { data, error } = await query;
     if (error) {
-      console.error("GET TASKS ERROR:", error);
+      console.error("[taskService] getTasks error:", error);
       throw error;
     }
-    return data as Task[];
+    console.log('[taskService] getTasks success, count:', data?.length);
+    return (data || []) as Task[];
   },
 
   async createTask(task: Partial<Task>) {

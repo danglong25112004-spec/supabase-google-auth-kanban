@@ -20,15 +20,17 @@ export function Dashboard() {
 
   useEffect(() => {
     const loadData = async () => {
+      console.log('[Dashboard] Loading data...');
       try {
         const [tasksData, projectsData] = await Promise.all([
           taskService.getTasks(),
           projectService.getProjects()
         ]);
-        setTasks(tasksData);
-        setProjects(projectsData);
+        console.log('[Dashboard] Data loaded:', { tasksCount: tasksData?.length, projectsCount: projectsData?.length });
+        setTasks(tasksData || []);
+        setProjects(projectsData || []);
       } catch (error) {
-        console.error('Error loading dashboard data:', error);
+        console.error('[Dashboard] Error loading dashboard data:', error);
       } finally {
         setLoading(false);
       }
@@ -39,28 +41,28 @@ export function Dashboard() {
   const stats = [
     { 
       label: 'Dự án', 
-      value: projects.length, 
+      value: projects?.length || 0, 
       icon: FolderKanban, 
       color: 'text-blue-500', 
       bg: 'bg-blue-500/10' 
     },
     { 
       label: 'Công việc', 
-      value: tasks.length, 
+      value: tasks?.length || 0, 
       icon: Clock, 
       color: 'text-indigo-500', 
       bg: 'bg-indigo-500/10' 
     },
     { 
       label: 'Hoàn thành', 
-      value: tasks.filter(t => t.status === 'done').length, 
+      value: (tasks || []).filter(t => t.status === 'done').length, 
       icon: CheckCircle2, 
       color: 'text-emerald-500', 
       bg: 'bg-emerald-500/10' 
     },
     { 
       label: 'Quá hạn', 
-      value: tasks.filter(t => t.due_date && new Date(t.due_date) < new Date() && t.status !== 'done').length, 
+      value: (tasks || []).filter(t => t.due_date && new Date(t.due_date) < new Date() && t.status !== 'done').length, 
       icon: AlertCircle, 
       color: 'text-rose-500', 
       bg: 'bg-rose-500/10' 
@@ -68,6 +70,7 @@ export function Dashboard() {
   ];
 
   if (loading) {
+    console.log('[Dashboard] Rendering loading state');
     return (
       <div className="space-y-8 animate-pulse">
         <div className="h-10 w-64 bg-slate-800 rounded-xl" />
@@ -80,6 +83,7 @@ export function Dashboard() {
     );
   }
 
+  console.log('[Dashboard] Rendering main UI');
   return (
     <div className="space-y-10">
       <header>
@@ -118,7 +122,7 @@ export function Dashboard() {
             </Link>
           </div>
           <div className="space-y-4">
-            {tasks.slice(0, 5).map(task => (
+            {(tasks || []).slice(0, 5).map(task => (
               <div key={task.id} className="flex items-center justify-between p-4 bg-slate-800/50 rounded-2xl border border-slate-700/50 hover:border-slate-600 transition-all group">
                 <div className="flex items-center gap-4">
                   <div className={`w-2 h-2 rounded-full ${
