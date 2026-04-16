@@ -37,30 +37,66 @@ export const projectService = {
 
 export const taskService = {
   async getTasks(projectId?: string) {
-    let query = supabase.from('tasks').select('*').order('created_at', { ascending: false });
+    const { data: userData } = await supabase.auth.getUser();
+    const user = userData.user;
+
+    if (!user) throw new Error("User not authenticated");
+
+    let query = supabase
+      .from('tasks')
+      .select('*')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false });
+    
     if (projectId) {
       query = query.eq('project_id', projectId);
     }
+
     const { data, error } = await query;
-    if (error) throw error;
+    if (error) {
+      console.error("GET TASKS ERROR:", error);
+      throw error;
+    }
     return data as Task[];
   },
 
   async createTask(task: Partial<Task>) {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) throw new Error('Not authenticated');
+    const { data: userData } = await supabase.auth.getUser();
+    const user = userData.user;
+
+    if (!user) {
+      throw new Error("User not authenticated");
+    }
+
+    const payload = {
+      title: task.title,
+      description: task.description || null,
+      status: task.status || 'todo',
+      priority: task.priority || 'Medium',
+      is_starred: task.is_starred || false,
+      user_id: user.id,
+      project_id: task.project_id // Keeping this as it's likely in the DB and used for filtering
+    };
+
+    console.log("USER:", user);
+    console.log("PAYLOAD:", payload);
 
     const { data, error } = await supabase
       .from('tasks')
-      .insert([{ ...task, user_id: user.id }])
+      .insert([payload])
       .select()
       .single();
     
-    if (error) throw error;
+    if (error) {
+      console.error("INSERT ERROR:", error);
+      alert(error.message);
+      throw error;
+    }
     return data as Task;
   },
 
   async updateTask(id: string, updates: Partial<Task>) {
+    console.log("UPDATING TASK:", id, updates);
     const { data, error } = await supabase
       .from('tasks')
       .update(updates)
@@ -68,17 +104,26 @@ export const taskService = {
       .select()
       .single();
     
-    if (error) throw error;
+    if (error) {
+      console.error("UPDATE ERROR:", error);
+      alert(error.message);
+      throw error;
+    }
     return data as Task;
   },
 
   async deleteTask(id: string) {
+    console.log("DELETING TASK:", id);
     const { error } = await supabase
       .from('tasks')
       .delete()
       .eq('id', id);
     
-    if (error) throw error;
+    if (error) {
+      console.error("DELETE ERROR:", error);
+      alert(error.message);
+      throw error;
+    }
   },
 
   async moveTaskStatus(id: string, status: TaskStatus) {

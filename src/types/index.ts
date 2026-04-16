@@ -1,5 +1,5 @@
-export type TaskStatus = 'todo' | 'in_progress' | 'review' | 'done';
-export type TaskPriority = 'low' | 'medium' | 'high';
+export type TaskStatus = 'todo' | 'doing' | 'done';
+export type TaskPriority = 'Low' | 'Medium' | 'High';
 
 export interface Project {
   id: string;

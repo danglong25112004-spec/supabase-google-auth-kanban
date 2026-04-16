@@ -35,15 +35,14 @@ export function Analytics() {
 
   const statusData = [
     { name: 'Cần làm', value: tasks.filter(t => t.status === 'todo').length },
-    { name: 'Đang làm', value: tasks.filter(t => t.status === 'in_progress').length },
-    { name: 'Xem xét', value: tasks.filter(t => t.status === 'review').length },
+    { name: 'Đang làm', value: tasks.filter(t => t.status === 'doing').length },
     { name: 'Hoàn thành', value: tasks.filter(t => t.status === 'done').length },
   ];
 
   const priorityData = [
-    { name: 'Thấp', value: tasks.filter(t => t.priority === 'low').length, color: '#10b981' },
-    { name: 'Trung bình', value: tasks.filter(t => t.priority === 'medium').length, color: '#f59e0b' },
-    { name: 'Cao', value: tasks.filter(t => t.priority === 'high').length, color: '#f43f5e' },
+    { name: 'Thấp', value: tasks.filter(t => t.priority === 'Low').length, color: '#10b981' },
+    { name: 'Trung bình', value: tasks.filter(t => t.priority === 'Medium').length, color: '#f59e0b' },
+    { name: 'Cao', value: tasks.filter(t => t.priority === 'High').length, color: '#f43f5e' },
   ];
 
   if (loading) return <div className="animate-pulse space-y-8">

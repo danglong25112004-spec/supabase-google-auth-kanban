@@ -122,8 +122,8 @@ export function Dashboard() {
               <div key={task.id} className="flex items-center justify-between p-4 bg-slate-800/50 rounded-2xl border border-slate-700/50 hover:border-slate-600 transition-all group">
                 <div className="flex items-center gap-4">
                   <div className={`w-2 h-2 rounded-full ${
-                    task.priority === 'high' ? 'bg-rose-500' : 
-                    task.priority === 'medium' ? 'bg-amber-500' : 'bg-emerald-500'
+                    task.priority === 'High' ? 'bg-rose-500' : 
+                    task.priority === 'Medium' ? 'bg-amber-500' : 'bg-emerald-500'
                   }`} />
                   <div>
                     <p className="text-sm font-bold text-white group-hover:text-blue-400 transition-colors">{task.title}</p>

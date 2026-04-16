@@ -26,7 +26,7 @@ export function Board() {
     title: '',
     description: '',
     status: 'todo' as TaskStatus,
-    priority: 'medium' as TaskPriority,
+    priority: 'Medium' as TaskPriority,
     due_date: ''
   });
 
@@ -79,7 +79,7 @@ export function Board() {
         title: '',
         description: '',
         status: 'todo',
-        priority: 'medium',
+        priority: 'Medium',
         due_date: ''
       });
     }
@@ -100,7 +100,8 @@ export function Board() {
       setIsModalOpen(false);
       loadTasks();
     } catch (error) {
-      console.error('Error saving task:', error);
+      // Error is already handled in taskService (alert + console.error)
+      console.error('Board handleSubmit error:', error);
     }
   };
 
@@ -126,8 +127,7 @@ export function Board() {
 
   const columns: { title: string; status: TaskStatus; color: string }[] = [
     { title: 'Cần làm', status: 'todo', color: 'bg-slate-400' },
-    { title: 'Đang làm', status: 'in_progress', color: 'bg-blue-500' },
-    { title: 'Đang xem xét', status: 'review', color: 'bg-amber-500' },
+    { title: 'Đang làm', status: 'doing', color: 'bg-blue-500' },
     { title: 'Hoàn thành', status: 'done', color: 'bg-emerald-500' },
   ];
 
@@ -189,8 +189,8 @@ export function Board() {
                       <div className="flex items-start justify-between mb-3">
                         <span className={cn(
                           "text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md",
-                          task.priority === 'high' ? "bg-rose-500/10 text-rose-500" :
-                          task.priority === 'medium' ? "bg-amber-500/10 text-amber-500" :
+                          task.priority === 'High' ? "bg-rose-500/10 text-rose-500" :
+                          task.priority === 'Medium' ? "bg-amber-500/10 text-amber-500" :
                           "bg-emerald-500/10 text-emerald-500"
                         )}>
                           {task.priority}
@@ -308,8 +308,7 @@ export function Board() {
                         className="w-full bg-slate-800 border border-slate-700 rounded-2xl px-5 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
                       >
                         <option value="todo">Cần làm</option>
-                        <option value="in_progress">Đang làm</option>
-                        <option value="review">Xem xét</option>
+                        <option value="doing">Đang làm</option>
                         <option value="done">Hoàn thành</option>
                       </select>
                     </div>
@@ -320,9 +319,9 @@ export function Board() {
                         onChange={e => setFormData({ ...formData, priority: e.target.value as TaskPriority })}
                         className="w-full bg-slate-800 border border-slate-700 rounded-2xl px-5 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
                       >
-                        <option value="low">Thấp</option>
-                        <option value="medium">Trung bình</option>
-                        <option value="high">Cao</option>
+                        <option value="Low">Thấp</option>
+                        <option value="Medium">Trung bình</option>
+                        <option value="High">Cao</option>
                       </select>
                     </div>
                   </div>
