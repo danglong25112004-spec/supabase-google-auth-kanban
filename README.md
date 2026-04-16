@@ -1,11 +1,43 @@
-<div align="center">
+# TaskFlow - Ứng dụng Quản lý Công việc Hiện đại
 
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
+Ứng dụng quản lý công việc (Kanban) được xây dựng bằng React, TypeScript, Tailwind CSS và Supabase.
 
-  <h1>Built with AI Studio</h2>
+## Tính năng
+- Đăng nhập bằng Google OAuth qua Supabase Auth.
+- Giao diện Dark Modern chuyên nghiệp.
+- Bảng Kanban kéo thả (mô phỏng) với đầy đủ CRUD.
+- Dashboard tổng quan với thống kê thời gian thực.
+- Phân tích dữ liệu với biểu đồ trực quan.
+- Quản lý hồ sơ người dùng.
+- Responsive hoàn toàn cho Mobile và Desktop.
 
-  <p>The fastest path from prompt to production with Gemini.</p>
+## Hướng dẫn thiết lập
 
-  <a href="https://aistudio.google.com/apps">Start building</a>
+### 1. Supabase Setup
+1. Tạo một dự án mới trên [Supabase](https://supabase.com/).
+2. Mở **SQL Editor** và chạy nội dung file `supabase_schema.sql`.
+3. Bật **Google Auth** trong phần **Authentication > Providers**:
+   - Cấu hình Client ID và Client Secret từ Google Cloud Console.
+   - Thêm Redirect URI: `https://<your-project-id>.supabase.co/auth/v1/callback`.
 
-</div>
+### 2. Biến môi trường
+Tạo file `.env` dựa trên `.env.example` và điền thông tin từ Supabase (Project Settings > API):
+```env
+VITE_SUPABASE_URL=your_supabase_project_url
+VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+```
+
+### 3. Chạy ứng dụng
+```bash
+npm install
+npm run dev
+```
+
+## Cấu trúc thư mục
+- `src/lib`: Cấu hình Supabase.
+- `src/services`: Logic tương tác dữ liệu.
+- `src/hooks`: Custom hooks (Auth).
+- `src/components`: Các component dùng chung.
+- `src/layouts`: Layout chính của ứng dụng.
+- `src/pages`: Các trang chức năng.
+- `src/types`: Định nghĩa kiểu dữ liệu TypeScript.
