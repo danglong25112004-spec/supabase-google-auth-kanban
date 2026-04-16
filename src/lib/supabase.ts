@@ -1,19 +1,39 @@
 import { createClient } from '@supabase/supabase-js'
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
+// --- DEBUG START ---
+const rawUrl = import.meta.env.VITE_SUPABASE_URL
+const rawKey = import.meta.env.VITE_SUPABASE_ANON_KEY
 
-console.log('SUPABASE URL =', supabaseUrl)
-console.log('SUPABASE KEY EXISTS =', !!supabaseAnonKey)
+console.log('>>> DEBUG SUPABASE URL:', rawUrl)
+console.log('>>> DEBUG SUPABASE KEY EXISTS:', !!rawKey)
+// --- DEBUG END ---
 
-if (!supabaseUrl || !supabaseUrl.startsWith('http')) {
-  throw new Error('Invalid supabaseUrl: Must be a valid HTTP or HTTPS URL. Check your .env file.')
+const supabaseUrl = rawUrl
+const supabaseAnonKey = rawKey
+
+const isPlaceholder = (val: string | undefined) => {
+  if (!val) return true;
+  const placeholders = [
+    'your_supabase_project_url',
+    'your_supabase_anon_key',
+    'YOUR_SUPABASE_URL',
+    'YOUR_SUPABASE_ANON_KEY',
+    'placeholder'
+  ];
+  return placeholders.some(p => val.includes(p));
+};
+
+if (!supabaseUrl || !supabaseUrl.startsWith('http') || isPlaceholder(supabaseUrl)) {
+  const msg = `LỖI CẤU HÌNH: URL Supabase không hợp lệ ("${supabaseUrl}"). Vui lòng kiểm tra file .env`;
+  console.error(msg);
+  throw new Error(msg);
 }
 
-if (!supabaseAnonKey) {
-  throw new Error('Missing Supabase Anon Key. Check your .env file.')
+if (!supabaseAnonKey || isPlaceholder(supabaseAnonKey)) {
+  const msg = `LỖI CẤU HÌNH: Key Supabase không hợp lệ. Vui lòng kiểm tra file .env`;
+  console.error(msg);
+  throw new Error(msg);
 }
 
-export const isSupabaseConfigured = true
-
-export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+export const isSupabaseConfigured = true;
+export const supabase = createClient(supabaseUrl, supabaseAnonKey);
