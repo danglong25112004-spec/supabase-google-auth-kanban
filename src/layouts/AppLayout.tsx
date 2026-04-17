@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
+import { useSearch } from '../hooks/useSearch';
 import { 
   LayoutDashboard, 
   Trello, 
@@ -18,6 +19,7 @@ import { cn } from '../utils';
 
 export function AppLayout() {
   const { user, signOut } = useAuth();
+  const { searchTerm, setSearchTerm } = useSearch();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const navigate = useNavigate();
 
@@ -115,6 +117,8 @@ export function AppLayout() {
               <input 
                 type="text" 
                 placeholder="Tìm kiếm công việc..." 
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
                 className="bg-slate-900 border border-slate-800 rounded-2xl py-2.5 pl-12 pr-6 w-80 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm"
               />
             </div>

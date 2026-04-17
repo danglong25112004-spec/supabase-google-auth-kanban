@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { taskService, projectService } from '../services/dataService';
 import { Task, Project } from '../types';
+import { useSearch } from '../hooks/useSearch';
 import { 
   CheckCircle2, 
   Clock, 
@@ -14,9 +15,19 @@ import { Link } from 'react-router-dom';
 
 export function Dashboard() {
   const { user } = useAuth();
+  const { searchTerm } = useSearch();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const filteredTasks = useMemo(() => {
+    if (!searchTerm) return tasks;
+    const lowerSearch = searchTerm.toLowerCase();
+    return tasks.filter(task => 
+      task.title.toLowerCase().includes(lowerSearch) || 
+      task.description?.toLowerCase().includes(lowerSearch)
+    );
+  }, [tasks, searchTerm]);
 
   useEffect(() => {
     const loadData = async () => {
@@ -48,21 +59,21 @@ export function Dashboard() {
     },
     { 
       label: 'Công việc', 
-      value: tasks?.length || 0, 
+      value: searchTerm ? filteredTasks.length : (tasks?.length || 0), 
       icon: Clock, 
       color: 'text-indigo-500', 
       bg: 'bg-indigo-500/10' 
     },
     { 
       label: 'Hoàn thành', 
-      value: (tasks || []).filter(t => t.status === 'done').length, 
+      value: (searchTerm ? filteredTasks : tasks).filter(t => t.status === 'done').length, 
       icon: CheckCircle2, 
       color: 'text-emerald-500', 
       bg: 'bg-emerald-500/10' 
     },
     { 
       label: 'Việc gấp', 
-      value: (tasks || []).filter(t => t.priority === 'High' && t.status !== 'done').length, 
+      value: (searchTerm ? filteredTasks : tasks).filter(t => t.priority === 'High' && t.status !== 'done').length, 
       icon: AlertCircle, 
       color: 'text-rose-500', 
       bg: 'bg-rose-500/10' 
@@ -122,7 +133,7 @@ export function Dashboard() {
             </Link>
           </div>
           <div className="space-y-4">
-            {(tasks || []).slice(0, 5).map(task => (
+            {filteredTasks.slice(0, 5).map(task => (
               <div key={task.id} className="flex items-center justify-between p-4 bg-slate-800/50 rounded-2xl border border-slate-700/50 hover:border-slate-600 transition-all group">
                 <div className="flex items-center gap-4">
                   <div className={`w-2 h-2 rounded-full ${
@@ -141,9 +152,11 @@ export function Dashboard() {
                 </div>
               </div>
             ))}
-            {tasks.length === 0 && (
+            {filteredTasks.length === 0 && (
               <div className="text-center py-12">
-                <p className="text-slate-500 italic">Chưa có công việc nào.</p>
+                <p className="text-slate-500 italic">
+                  {searchTerm ? 'Không tìm thấy công việc nào phù hợp.' : 'Chưa có công việc nào.'}
+                </p>
               </div>
             )}
           </div>

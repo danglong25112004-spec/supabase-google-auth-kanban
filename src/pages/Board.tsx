@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { taskService, projectService } from '../services/dataService';
 import { Task, Project, TaskStatus, TaskPriority } from '../types';
+import { useSearch } from '../hooks/useSearch';
 import { 
   Plus, 
   MoreVertical, 
@@ -15,12 +16,22 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '../utils';
 
 export function Board() {
+  const { searchTerm } = useSearch();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
   const [selectedProjectId, setSelectedProjectId] = useState<string>('');
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
+
+  const filteredTasks = useMemo(() => {
+    if (!searchTerm) return tasks;
+    const lowerSearch = searchTerm.toLowerCase();
+    return tasks.filter(task => 
+      task.title.toLowerCase().includes(lowerSearch) || 
+      task.description?.toLowerCase().includes(lowerSearch)
+    );
+  }, [tasks, searchTerm]);
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -176,7 +187,7 @@ export function Board() {
                   <div className={cn("w-2 h-2 rounded-full", column.color)} />
                   <h3 className="font-bold text-slate-200">{column.title}</h3>
                   <span className="text-xs font-bold bg-slate-800 text-slate-500 px-2 py-0.5 rounded-full">
-                    {(tasks || []).filter(t => t.status === column.status).length}
+                    {filteredTasks.filter(t => t.status === column.status).length}
                   </span>
                 </div>
                 <button className="p-1 text-slate-500 hover:text-slate-300">
@@ -185,7 +196,7 @@ export function Board() {
               </div>
 
               <div className="flex-1 space-y-4 min-h-[200px]">
-                {(tasks || [])
+                {filteredTasks
                   .filter(t => t.status === column.status)
                   .map(task => (
                     <motion.div
@@ -245,6 +256,12 @@ export function Board() {
                       </div>
                     </motion.div>
                   ))}
+                
+                {searchTerm && filteredTasks.filter(t => t.status === column.status).length === 0 && tasks.filter(t => t.status === column.status).length > 0 && (
+                  <div className="py-8 text-center border-2 border-dashed border-slate-800/50 rounded-2xl">
+                    <p className="text-xs text-slate-500 italic px-4">Không tìm thấy kết quả</p>
+                  </div>
+                )}
                 
                 <button 
                   onClick={() => handleOpenModal(undefined, column.status)}

@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './hooks/useAuth';
+import { SearchProvider } from './hooks/useSearch';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { Login } from './pages/Login';
 import { AuthCallback } from './pages/AuthCallback';
@@ -42,29 +43,31 @@ function App() {
   return (
     <ErrorBoundary>
       <AuthProvider>
-        <Router>
-          <Routes>
-            {/* Public Routes */}
-            <Route path="/login" element={<Login />} />
-            <Route path="/auth/callback" element={<AuthCallback />} />
+        <SearchProvider>
+          <Router>
+            <Routes>
+              {/* Public Routes */}
+              <Route path="/login" element={<Login />} />
+              <Route path="/auth/callback" element={<AuthCallback />} />
 
-            {/* Protected App Routes */}
-            <Route path="/app" element={<ProtectedRoute />}>
-              <Route element={<AppLayout />}>
-                <Route index element={<Dashboard />} />
-                <Route path="board" element={<Board />} />
-                <Route path="analytics" element={<Analytics />} />
-                <Route path="team" element={<Team />} />
-                <Route path="storage" element={<Storage />} />
-                <Route path="profile" element={<Profile />} />
+              {/* Protected App Routes */}
+              <Route path="/app" element={<ProtectedRoute />}>
+                <Route element={<AppLayout />}>
+                  <Route index element={<Dashboard />} />
+                  <Route path="board" element={<Board />} />
+                  <Route path="analytics" element={<Analytics />} />
+                  <Route path="team" element={<Team />} />
+                  <Route path="storage" element={<Storage />} />
+                  <Route path="profile" element={<Profile />} />
+                </Route>
               </Route>
-            </Route>
 
-            {/* Redirects */}
-            <Route path="/" element={<Navigate to="/app" replace />} />
-            <Route path="*" element={<Navigate to="/app" replace />} />
-          </Routes>
-        </Router>
+              {/* Redirects */}
+              <Route path="/" element={<Navigate to="/app" replace />} />
+              <Route path="*" element={<Navigate to="/app" replace />} />
+            </Routes>
+          </Router>
+        </SearchProvider>
       </AuthProvider>
     </ErrorBoundary>
   );
