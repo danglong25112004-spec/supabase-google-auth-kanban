@@ -8,9 +8,11 @@ import {
   Clock, 
   AlertCircle, 
   FolderKanban,
-  ArrowRight
+  ArrowRight,
+  Plus,
+  X
 } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
 
 export function Dashboard() {
@@ -19,6 +21,12 @@ export function Dashboard() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
+  
+  const [isProjectModalOpen, setIsProjectModalOpen] = useState(false);
+  const [projectFormData, setProjectFormData] = useState({
+    name: '',
+    description: ''
+  });
 
   const filteredTasks = useMemo(() => {
     if (!searchTerm) return tasks;
@@ -29,25 +37,36 @@ export function Dashboard() {
     );
   }, [tasks, searchTerm]);
 
+  const loadData = async () => {
+    try {
+      const [tasksData, projectsData] = await Promise.all([
+        taskService.getTasks(),
+        projectService.getProjects()
+      ]);
+      setTasks(tasksData || []);
+      setProjects(projectsData || []);
+    } catch (error) {
+      console.error('[Dashboard] Error loading dashboard data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const loadData = async () => {
-      console.log('[Dashboard] Loading data...');
-      try {
-        const [tasksData, projectsData] = await Promise.all([
-          taskService.getTasks(),
-          projectService.getProjects()
-        ]);
-        console.log('[Dashboard] Data loaded:', { tasksCount: tasksData?.length, projectsCount: projectsData?.length });
-        setTasks(tasksData || []);
-        setProjects(projectsData || []);
-      } catch (error) {
-        console.error('[Dashboard] Error loading dashboard data:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
     loadData();
   }, []);
+
+  const handleCreateProject = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      await projectService.createProject(projectFormData.name, projectFormData.description);
+      setIsProjectModalOpen(false);
+      setProjectFormData({ name: '', description: '' });
+      loadData();
+    } catch (error) {
+      console.error('Error creating project:', error);
+    }
+  };
 
   const stats = [
     { 
@@ -165,8 +184,11 @@ export function Dashboard() {
         <section className="bg-slate-900 border border-slate-800 rounded-3xl p-8">
           <div className="flex items-center justify-between mb-8">
             <h2 className="text-xl font-bold text-white">Dự án hiện tại</h2>
-            <button className="text-blue-500 hover:text-blue-400 text-sm font-bold flex items-center gap-2 transition-all">
-              Thêm mới <ArrowRight className="w-4 h-4" />
+            <button 
+              onClick={() => setIsProjectModalOpen(true)}
+              className="text-blue-500 hover:text-blue-400 text-sm font-bold flex items-center gap-2 transition-all"
+            >
+              Thêm mới <Plus className="w-4 h-4" />
             </button>
           </div>
           <div className="grid grid-cols-1 gap-4">
@@ -184,9 +206,84 @@ export function Dashboard() {
                 </div>
               </div>
             ))}
+            {projects.length === 0 && (
+              <div className="text-center py-12 border-2 border-dashed border-slate-800 rounded-3xl">
+                <p className="text-slate-500 italic">Chưa có dự án nào.</p>
+              </div>
+            )}
           </div>
         </section>
       </div>
+
+      {/* Project Modal */}
+      <AnimatePresence>
+        {isProjectModalOpen && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsProjectModalOpen(false)}
+              className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="relative w-full max-w-lg bg-slate-900 border border-slate-800 rounded-3xl shadow-2xl overflow-hidden"
+            >
+              <div className="p-8">
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-2xl font-bold text-white">Tạo dự án mới</h2>
+                  <button 
+                    onClick={() => setIsProjectModalOpen(false)}
+                    className="p-2 hover:bg-slate-800 rounded-xl text-slate-400 transition-colors"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+                <form onSubmit={handleCreateProject} className="space-y-6">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Tên dự án</label>
+                    <input
+                      required
+                      type="text"
+                      value={projectFormData.name}
+                      onChange={e => setProjectFormData({ ...projectFormData, name: e.target.value })}
+                      className="w-full bg-slate-800 border border-slate-700 rounded-2xl px-5 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+                      placeholder="VD: Website Marketing, Mobile App..."
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Mô tả</label>
+                    <textarea
+                      value={projectFormData.description}
+                      onChange={e => setProjectFormData({ ...projectFormData, description: e.target.value })}
+                      className="w-full bg-slate-800 border border-slate-700 rounded-2xl px-5 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all h-32 resize-none"
+                      placeholder="Nhập mô tả dự án..."
+                    />
+                  </div>
+                  <div className="flex gap-4 pt-4">
+                    <button
+                      type="button"
+                      onClick={() => setIsProjectModalOpen(false)}
+                      className="flex-1 px-6 py-4 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-2xl transition-all"
+                    >
+                      Hủy
+                    </button>
+                    <button
+                      type="submit"
+                      className="flex-1 px-6 py-4 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-2xl transition-all shadow-lg shadow-blue-600/20"
+                    >
+                      Tạo dự án
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
