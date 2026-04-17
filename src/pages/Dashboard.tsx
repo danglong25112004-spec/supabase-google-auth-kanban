@@ -29,9 +29,12 @@ export function Dashboard() {
   });
 
   const filteredTasks = useMemo(() => {
-    if (!searchTerm) return tasks;
+    // Chỉ xử lý những nhiệm vụ CHƯA đánh dấu sao (không nằm trong Lưu trữ)
+    const baseTasks = tasks.filter(task => !task.is_starred);
+    
+    if (!searchTerm) return baseTasks;
     const lowerSearch = searchTerm.toLowerCase();
-    return tasks.filter(task => 
+    return baseTasks.filter(task => 
       task.title.toLowerCase().includes(lowerSearch) || 
       task.description?.toLowerCase().includes(lowerSearch)
     );
@@ -78,21 +81,21 @@ export function Dashboard() {
     },
     { 
       label: 'Công việc', 
-      value: searchTerm ? filteredTasks.length : (tasks?.length || 0), 
+      value: filteredTasks.length, 
       icon: Clock, 
       color: 'text-indigo-500', 
       bg: 'bg-indigo-500/10' 
     },
     { 
       label: 'Hoàn thành', 
-      value: (searchTerm ? filteredTasks : tasks).filter(t => t.status === 'done').length, 
+      value: filteredTasks.filter(t => t.status === 'done').length, 
       icon: CheckCircle2, 
       color: 'text-emerald-500', 
       bg: 'bg-emerald-500/10' 
     },
     { 
       label: 'Việc gấp', 
-      value: (searchTerm ? filteredTasks : tasks).filter(t => t.priority === 'High' && t.status !== 'done').length, 
+      value: filteredTasks.filter(t => t.priority === 'High' && t.status !== 'done').length, 
       icon: AlertCircle, 
       color: 'text-rose-500', 
       bg: 'bg-rose-500/10' 

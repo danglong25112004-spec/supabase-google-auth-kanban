@@ -25,9 +25,12 @@ export function Board() {
   const [editingTask, setEditingTask] = useState<Task | null>(null);
 
   const filteredTasks = useMemo(() => {
-    if (!searchTerm) return tasks;
+    // Chỉ hiển thị những nhiệm vụ CHƯA đánh dấu sao (vì đánh dấu sao sẽ chuyển vào Lưu trữ)
+    const baseTasks = tasks.filter(task => !task.is_starred);
+    
+    if (!searchTerm) return baseTasks;
     const lowerSearch = searchTerm.toLowerCase();
-    return tasks.filter(task => 
+    return baseTasks.filter(task => 
       task.title.toLowerCase().includes(lowerSearch) || 
       task.description?.toLowerCase().includes(lowerSearch)
     );
